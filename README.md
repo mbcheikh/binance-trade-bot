@@ -74,7 +74,7 @@ SCOUT_MULTIPLIER: 5
 SCOUT_SLEEP_TIME: 5
 TLD: com
 STRATEGY: default
-max-amount: 0
+MAX_AMOUNT: 0
 
 ```
 
