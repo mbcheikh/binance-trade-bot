@@ -57,7 +57,9 @@ Create a .cfg file named `user.cfg` based off `.user.cfg.example`, then add your
 -   **hourToKeepScoutHistory** - Controls how many hours of scouting values are kept in the database. After the amount of time specified has passed, the information will be deleted.
 -   **scout_multiplier** - Controls the value by which the difference between the current state of coin ratios and previous state of ratios is multiplied. For bigger values, the bot will wait for bigger margins to arrive before making a trade.
 -   **strategy** - The trading strategy to use. See [`binance_trade_bot/strategies`](binance_trade_bot/strategies/README.md) for more information
-
+-   **max_amount** - The maximum amount in a coin balances that the bot can trade, exprimed in the bridge coin
+ Zero amount means that the bot can trade all balances amounts
+    
 #### Environment Variables
 
 All of the options provided in `user.cfg` can also be configured using environment variables.
@@ -72,6 +74,8 @@ SCOUT_MULTIPLIER: 5
 SCOUT_SLEEP_TIME: 5
 TLD: com
 STRATEGY: default
+max-amount: 0
+
 ```
 
 ### Paying Fees with BNB
