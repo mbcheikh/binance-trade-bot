@@ -10,14 +10,12 @@ class Strategy(AutoTrader):
         have_coin = False
 
         # last coin bought
-        current_coin = self.db.get_current_coin()
-        current_coin_symbol = ""
-
-        if current_coin is not None:
-            current_coin_symbol = current_coin.symbol
-
+        current_balances=self.manager.get_balances()
+        current_balances_dict={d['asset']:float(d['free']) for d in current_balances if float(d['free'])>0}
         for coin in self.db.get_coins():
-            current_coin_balance = self.manager.get_currency_balance(coin.symbol)
+            if not coin.symbol in current_balances_dict:
+                continue
+            current_coin_balance = current_balances_dict[coin.symbol]
             coin_price = all_tickers.get_price(coin + self.config.BRIDGE)
 
             if coin_price is None:
@@ -26,14 +24,14 @@ class Strategy(AutoTrader):
 
             min_notional = self.manager.get_min_notional(coin.symbol, self.config.BRIDGE.symbol)
 
-            if coin.symbol != current_coin_symbol and coin_price * current_coin_balance < min_notional:
+            if  coin_price * current_coin_balance < min_notional:
                 continue
 
             have_coin = True
 
             # Display on the console, the current coin+Bridge, so users can see *some* activity and not think the bot
             # has stopped. Not logging though to reduce log size.
-            self.logger.info(f"Scouting for best trades. Current ticker: {coin + self.config.BRIDGE} ", False)
+            self.logger.info(f"Scouting for best trades. Current ticker: {coin} ", False)
 
             self._jump_to_best_coin(coin, coin_price, all_tickers)
 
