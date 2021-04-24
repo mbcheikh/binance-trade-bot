@@ -157,7 +157,7 @@ class Database:
             pair = session.merge(pair)
             sh = ScoutHistory(pair, target_ratio, current_coin_price, other_coin_price)
             session.add(sh)
-            self.send_update(sh)
+            #self.send_update(sh)
 
     def prune_scout_history(self):
         time_diff = datetime.now() - timedelta(hours=self.config.SCOUT_HISTORY_PRUNE_TIME)
@@ -269,7 +269,7 @@ class TradeLog:
             session.add(self.trade)
             # Flush so that SQLAlchemy fills in the id column
             session.flush()
-            self.db.send_update(self.trade)
+            #self.db.send_update(self.trade)
 
     def set_ordered(self, alt_starting_balance, crypto_starting_balance, alt_trade_amount):
         session: Session
@@ -279,7 +279,7 @@ class TradeLog:
             trade.alt_trade_amount = alt_trade_amount
             trade.crypto_starting_balance = crypto_starting_balance
             trade.state = TradeState.ORDERED
-            self.db.send_update(trade)
+            #self.db.send_update(trade)
 
     def set_complete(self, crypto_trade_amount):
         session: Session
@@ -287,7 +287,7 @@ class TradeLog:
             trade: Trade = session.merge(self.trade)
             trade.crypto_trade_amount = crypto_trade_amount
             trade.state = TradeState.COMPLETE
-            self.db.send_update(trade)
+            #self.db.send_update(trade)
 
 
 if __name__ == "__main__":

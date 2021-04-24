@@ -214,4 +214,4 @@ class AutoTrader:
                 btc_value = all_ticker_values.get_price(coin + "BTC")
                 cv = CoinValue(coin, balance, usd_value, btc_value, datetime=now)
                 session.add(cv)
-                self.db.send_update(cv)
+                #self.db.send_update(cv)
