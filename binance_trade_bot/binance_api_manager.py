@@ -42,6 +42,7 @@ class BinanceAPIManager:
 
     def get_fee(self, origin_coin: Coin, target_coin: Coin, selling: bool):
         return 0.00075
+        """
         base_fee = self.get_trade_fees()[origin_coin + target_coin]
         if not self.get_using_bnb_for_fees():
             return base_fee
@@ -63,6 +64,7 @@ class BinanceAPIManager:
         if bnb_balance >= fee_amount_bnb:
             return base_fee * 0.75
         return base_fee
+        """
 
     def get_all_market_tickers(self) -> AllTickers:
         """
@@ -178,6 +180,7 @@ class BinanceAPIManager:
 
     def buy_alt(self, origin_coin: Coin, target_coin: Coin, all_tickers: AllTickers, marketBuy: bool):
         return self.retry(self._buy_alt, origin_coin, target_coin, all_tickers, marketBuy=marketBuy )
+
     def _should_cancel_order(self, order_status):
         minutes = (time.time() - order_status["time"] / 1000) / 60
         timeout = 0
@@ -201,8 +204,6 @@ class BinanceAPIManager:
 
         return False
 
-    def buy_alt(self, origin_coin: Coin, target_coin: Coin, all_tickers: AllTickers):
-        return self.retry(self._buy_alt, origin_coin, target_coin, all_tickers)
 
     def _buy_quantity(
         self, origin_symbol: str, target_symbol: str, target_balance: float = None, from_coin_price: float = None
