@@ -94,7 +94,7 @@ class BinanceAPIManager:
         return self.binance_client.get_account()["balances"]
 
     def retry(self, func, *args, **kwargs):
-        time.sleep(1)
+        #time.sleep(1)
         attempts = 0
         while attempts < 20:
             try:
