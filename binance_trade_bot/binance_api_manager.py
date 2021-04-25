@@ -178,7 +178,7 @@ class BinanceAPIManager:
 
         return order_status
 
-    def buy_alt(self, origin_coin: Coin, target_coin: Coin, all_tickers: AllTickers, marketBuy: bool):
+    def buy_alt(self, origin_coin: Coin, target_coin: Coin, all_tickers: AllTickers, marketBuy: bool=False):
         return self.retry(self._buy_alt, origin_coin, target_coin, all_tickers, marketBuy=marketBuy )
 
     def _should_cancel_order(self, order_status):
