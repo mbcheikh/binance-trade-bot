@@ -38,20 +38,26 @@ class AutoTrader:
                 "Direct pair {0}{1} exists. Selling {0} for {1}".format(pair.from_coin_id, pair.to_coin_id)
             )
             result = self.manager.sell_alt(pair.from_coin, pair.to_coin, all_tickers)
+            if result:
+                price=result['price']*all_tickers.get_price(pair.to_coin+self.config.BRIDGE)
 
         elif all_tickers.get_price(pair.to_coin_id + pair.from_coin_id) is not None:
             self.logger.info(
                 "Direct pair {0}{1} exists. Buying {0} with {1}".format(pair.to_coin_id, pair.from_coin_id)
             )
-            result = self.manager.buy_alt(pair.to_coin, pair.from_coin, all_tickers, True)
+            result = self.manager.buy_alt(pair.to_coin, pair.from_coin, all_tickers, False)
+            if result:
+                price = result['price'] * all_tickers.get_price(pair.from_coin + self.config.BRIDGE)
         else:
             if self.manager.sell_alt(pair.from_coin, self.config.BRIDGE, all_tickers) is None:
                 self.logger.info("Couldn't sell, going back to scouting mode...")
                 return None
             result = self.manager.buy_alt(pair.to_coin, self.config.BRIDGE, all_tickers, False)
+            if result:
+                price=result['price']
 
         if result is not None:
-            self.update_trade_threshold(pair.to_coin, float(result["price"]), all_tickers)
+            self.update_trade_threshold(pair.to_coin, price, all_tickers)
             return result
         self.logger.info("Couldn't buy, going back to scouting mode...")
         return None
@@ -60,7 +66,6 @@ class AutoTrader:
         """
         Update all the coins with the threshold of buying the current held coin
         """
-
         if coin_price is None:
             self.logger.info("Skipping update... current coin {} not found".format(coin + self.config.BRIDGE))
             return
@@ -196,6 +201,7 @@ class AutoTrader:
         """
         Log current value state of all altcoin balances against BTC and USDT in DB.
         """
+        print("Logging values...")
         all_ticker_values = self.manager.get_all_market_tickers()
 
         now = datetime.now()
@@ -206,12 +212,15 @@ class AutoTrader:
             balances=self.manager.get_balances()
             balances_dict={d['asset']:float(d['free']) for d in balances if float(d['free'])>0}
             for coin in coins:
-                if coin.symbol not in balances_dict:
+                if coin.symbol not in balances_dict :
                     continue
                 balance = balances_dict[coin.symbol]
 
                 usd_value = all_ticker_values.get_price(coin + "USDT")
                 btc_value = all_ticker_values.get_price(coin + "BTC")
+                if usd_value and btc_value:
+                    print("coin:", coin.symbol, "price usd: ", usd_value, "BTC:", btc_value, " balance usd:",
+                      usd_value * balance, " balance BTC:", btc_value * balance)
                 cv = CoinValue(coin, balance, usd_value, btc_value, datetime=now)
                 session.add(cv)
                 #self.db.send_update(cv)

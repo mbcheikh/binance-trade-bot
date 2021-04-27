@@ -267,16 +267,7 @@ class BinanceAPIManager:
             if origin_coin == self.config.BRIDGE:
                 # In a market buy, the order price needs to be calculated from the average of all partial fills.
                 order["price"] = self.get_averaged_price(order)
-            else:
-                # In a direct-pair market trade (not coming from the bridge currency),
-                # "order" does not contain the price of the target coin relative to the bridge currency
-                # (only the price between the two coins).
-                # this assumes the order price relative to the bridge currency is determined based
-                # on the current price since the market transaction is nearly instantaneous.
-                order["price"] = all_tickers.get_price(origin_coin + self.config.BRIDGE.symbol)
-                self.logger.info(
-                    "Price of {0} was {1} {2} per {0}.".format(target_symbol, order["price"], self.config.BRIDGE.symbol)
-                )
+
 
         return order
 

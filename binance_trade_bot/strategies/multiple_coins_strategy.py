@@ -31,7 +31,7 @@ class Strategy(AutoTrader):
 
             # Display on the console, the current coin+Bridge, so users can see *some* activity and not think the bot
             # has stopped. Not logging though to reduce log size.
-            self.logger.info(f"Scouting for best trades. Current ticker: {coin} ", False)
+            print(f"Scouting for best trades. Current coin: {coin} ")
 
             self._jump_to_best_coin(coin, coin_price, all_tickers)
 
