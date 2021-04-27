@@ -218,9 +218,10 @@ class AutoTrader:
 
                 usd_value = all_ticker_values.get_price(coin + "USDT")
                 btc_value = all_ticker_values.get_price(coin + "BTC")
+                value_of_btc=all_ticker_values.get_price('BTCUSDT')
                 if usd_value and btc_value:
                     print("coin:", coin.symbol, "price usd: ", usd_value, "BTC:", btc_value, " balance usd:",
-                      usd_value * balance, " balance BTC:", btc_value * balance)
+                      usd_value * balance, " balance BTC:", btc_value * balance,' Value_BTC:',value_of_btc)
                 cv = CoinValue(coin, balance, usd_value, btc_value, datetime=now)
                 session.add(cv)
                 #self.db.send_update(cv)
