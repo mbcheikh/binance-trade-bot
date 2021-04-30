@@ -39,7 +39,7 @@ class AutoTrader:
             )
             result = self.manager.sell_alt(pair.from_coin, pair.to_coin, all_tickers)
             if result:
-                price=result['price']*all_tickers.get_price(pair.to_coin+self.config.BRIDGE)
+                price=float(result['price'])*all_tickers.get_price(pair.to_coin+self.config.BRIDGE)
 
         elif all_tickers.get_price(pair.to_coin_id + pair.from_coin_id) is not None:
             self.logger.info(
@@ -47,14 +47,14 @@ class AutoTrader:
             )
             result = self.manager.buy_alt(pair.to_coin, pair.from_coin, all_tickers, False)
             if result:
-                price = result['price'] * all_tickers.get_price(pair.from_coin + self.config.BRIDGE)
+                price = float(result['price']) * all_tickers.get_price(pair.from_coin + self.config.BRIDGE)
         else:
             if self.manager.sell_alt(pair.from_coin, self.config.BRIDGE, all_tickers) is None:
                 self.logger.info("Couldn't sell, going back to scouting mode...")
                 return None
             result = self.manager.buy_alt(pair.to_coin, self.config.BRIDGE, all_tickers, False)
             if result:
-                price=result['price']
+                price=float(result['price'])
 
         if result is not None:
             self.update_trade_threshold(pair.to_coin, price, all_tickers)
