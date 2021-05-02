@@ -213,12 +213,15 @@ class AutoTrader:
             balances=self.manager.get_balances()
             balances_dict={d['asset']:float(d['free']) for d in balances if float(d['free'])>0}
             for coin in coins:
-                if coin.symbol not in balances_dict :
+                if coin.symbol not in balances_dict or coin.symbol==self.config.BRIDGE_SYMBOL:
                     continue
                 balance = balances_dict[coin.symbol]
 
                 usd_value = all_ticker_values.get_price(coin + "USDT")
-                btc_value = all_ticker_values.get_price(coin + "USDT")/all_ticker_values.get_price('BTCUSDT')
+                try:
+                    btc_value = all_ticker_values.get_price(coin + "USDT")/all_ticker_values.get_price('BTCUSDT')
+                except:
+                    kiki=0
                 value_of_btc=all_ticker_values.get_price('BTCUSDT')
                 if usd_value and btc_value:
                     print("coin:", coin.symbol, "price usd: ", usd_value, "BTC:", btc_value, " balance usd:",
