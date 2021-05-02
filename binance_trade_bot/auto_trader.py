@@ -32,8 +32,9 @@ class AutoTrader:
                 f"Incorrect coin balance {pair.from_coin}"
             )
             return None
-
-        if all_tickers.get_price(pair.from_coin_id + pair.to_coin_id) is not None:
+        direct_pair_price=all_tickers.get_price(pair.from_coin_id + pair.to_coin_id)
+        inverse_pair_price=all_tickers.get_price(pair.to_coin_id + pair.from_coin_id)
+        if direct_pair_price and float(direct_pair_price)>1e-6:
             self.logger.info(
                 "Direct pair {0}{1} exists. Selling {0} for {1}".format(pair.from_coin_id, pair.to_coin_id)
             )
@@ -41,7 +42,7 @@ class AutoTrader:
             if result:
                 price=float(result['price'])*all_tickers.get_price(pair.to_coin+self.config.BRIDGE)
 
-        elif all_tickers.get_price(pair.to_coin_id + pair.from_coin_id) is not None:
+        elif inverse_pair_price and float(inverse_pair_price)>1e-06:
             self.logger.info(
                 "Direct pair {0}{1} exists. Buying {0} with {1}".format(pair.to_coin_id, pair.from_coin_id)
             )
@@ -128,11 +129,11 @@ class AutoTrader:
 
             pair_exists = (all_tickers.get_price(pair.from_coin + pair.to_coin),
                            all_tickers.get_price(pair.to_coin + pair.from_coin))
-            if pair_exists[0]:
+            if pair_exists[0] and pair_exists[0]>1e-06:
                 coin_price = pair_exists[0]
                 optional_coin_price = 1
                 transaction_fee = self.manager.get_fee(pair.from_coin, pair.to_coin, True)
-            elif pair_exists[1]:
+            elif pair_exists[1] and pair_exists[1]>1e-06:
                 coin_price = 1
                 optional_coin_price = pair_exists[1]
                 transaction_fee = self.manager.get_fee(pair.to_coin, pair.from_coin, False)
