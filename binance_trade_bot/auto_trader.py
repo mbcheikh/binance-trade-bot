@@ -218,7 +218,7 @@ class AutoTrader:
                 balance = balances_dict[coin.symbol]
 
                 usd_value = all_ticker_values.get_price(coin + "USDT")
-                btc_value = all_ticker_values.get_price(coin + "BTC")
+                btc_value = all_ticker_values.get_price(coin + "USDT")/all_ticker_values.get_price('BTCUSDT')
                 value_of_btc=all_ticker_values.get_price('BTCUSDT')
                 if usd_value and btc_value:
                     print("coin:", coin.symbol, "price usd: ", usd_value, "BTC:", btc_value, " balance usd:",
