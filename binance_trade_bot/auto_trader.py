@@ -124,9 +124,16 @@ class AutoTrader:
         Given a coin, get the current price ratio for every other enabled coin
         """
         ratio_dict: Dict[Pair, float] = {}
+        current_balances=self.manager.get_balances()
+        current_balances_dict={d['asset']:float(d['free']) for d in current_balances if float(d['free'])>0}
+
 
         for pair in self.db.get_pairs_from(coin):
+            min_amount=self.config.MIN_AMOUNT
 
+
+            if pair.to_coin.symbol in current_balances_dict and current_balances_dict[pair.to_coin.symbol]*all_tickers.get_price(pair.to_coin.symbol+self.config.BRIDGE_SYMBOL) >= self.config.MIN_AMOUNT:
+                continue
             pair_exists = (all_tickers.get_price(pair.from_coin + pair.to_coin),
                            all_tickers.get_price(pair.to_coin + pair.from_coin))
             if pair_exists[0] and pair_exists[0]>1e-06:
@@ -174,6 +181,7 @@ class AutoTrader:
         if ratio_dict:
             best_pair = max(ratio_dict, key=ratio_dict.get)
             self.logger.info(f"Will be jumping from {coin} to {best_pair.to_coin_id}")
+
             self.transaction_through_bridge(best_pair, all_tickers)
 
     def bridge_scout(self):
@@ -208,24 +216,30 @@ class AutoTrader:
         now = datetime.now()
 
         session: Session
+        bridge_symbol=self.config.BRIDGE_SYMBOL
         with self.db.db_session() as session:
             coins: List[Coin] = session.query(Coin).all()
             balances=self.manager.get_balances()
             balances_dict={d['asset']:float(d['free']) for d in balances if float(d['free'])>0}
+            total_balance_usd=total_balance_btc=0
             for coin in coins:
+                btc_value=usd_value=0
                 if coin.symbol not in balances_dict or coin.symbol==self.config.BRIDGE_SYMBOL:
                     continue
                 balance = balances_dict[coin.symbol]
 
-                usd_value = all_ticker_values.get_price(coin + "USDT")
+                usd_value = all_ticker_values.get_price(coin + bridge_symbol)
                 try:
-                    btc_value = all_ticker_values.get_price(coin + "USDT")/all_ticker_values.get_price('BTCUSDT')
+                    btc_value = all_ticker_values.get_price(coin + bridge_symbol)/all_ticker_values.get_price('BTC'+bridge_symbol)
                 except:
-                    kiki=0
-                value_of_btc=all_ticker_values.get_price('BTCUSDT')
+                    print ('maj cv impossible with '+coin.symbol)
+                value_of_btc=all_ticker_values.get_price('BTC'+bridge_symbol)
                 if usd_value and btc_value:
                     print("coin:", coin.symbol, "price usd: ", usd_value, "BTC:", btc_value, " balance usd:",
-                      usd_value * balance, " balance BTC:", btc_value * balance,' Value_BTC:',value_of_btc)
+                        usd_value * balance, " balance BTC:", btc_value * balance,' Value_BTC:',value_of_btc)
+                    total_balance_btc+=btc_value * balance
+                    total_balance_usd+=usd_value * balance
                 cv = CoinValue(coin, balance, usd_value, btc_value, datetime=now)
                 session.add(cv)
                 #self.db.send_update(cv)
+            print('Total balance usd:', total_balance_usd,' Total balance BTC:',total_balance_btc )

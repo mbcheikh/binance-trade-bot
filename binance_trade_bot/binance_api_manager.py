@@ -226,6 +226,15 @@ class BinanceAPIManager:
         origin_balance = self.get_currency_balance(origin_symbol)
         target_balance = self.get_currency_balance(target_symbol)
         from_coin_price = all_tickers.get_price(origin_symbol + target_symbol)
+        if self.config.MAX_AMOUNT:
+            target_coin_price_bridge=1
+            if target_coin.symbol!=self.config.BRIDGE_SYMBOL:
+                target_coin_price_bridge=all_tickers.get_price(target_symbol+self.config.BRIDGE_SYMBOL)
+            if target_balance * target_coin_price_bridge> self.config.MAX_AMOUNT+self.config.MIN_AMOUNT:
+                target_balance=self.config.MAX_AMOUNT / target_coin_price_bridge
+
+
+
 
         order_quantity = self._buy_quantity(origin_symbol, target_symbol, target_balance, from_coin_price)
         self.logger.info(f"BUY QTY {order_quantity}")
@@ -291,6 +300,15 @@ class BinanceAPIManager:
         origin_balance = self.get_currency_balance(origin_symbol)
         target_balance = self.get_currency_balance(target_symbol)
         from_coin_price = all_tickers.get_price(origin_symbol + target_symbol)
+        if self.config.MAX_AMOUNT:
+            from_coin_price_bridge=from_coin_price
+            if target_symbol != self.config.BRIDGE_SYMBOL:
+                from_coin_price_bridge=all_tickers.get_price(origin_symbol+self.config.BRIDGE_SYMBOL)
+            origin_balance_bridge=origin_balance*from_coin_price_bridge
+            if origin_balance_bridge>self.config.MAX_AMOUNT + self.config.MIN_AMOUNT:
+                origin_balance= self.config.MAX_AMOUNT/from_coin_price_bridge
+
+
 
         order_quantity = self._sell_quantity(origin_symbol, target_symbol, origin_balance)
         self.logger.info(f"Selling {order_quantity} of {origin_symbol}")

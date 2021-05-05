@@ -21,6 +21,8 @@ class Config:  # pylint: disable=too-few-public-methods,too-many-instance-attrib
             "strategy": "default",
             "sell_timeout": "0",
             "buy_timeout": "0",
+            "max_amount": 200,
+            "min_amount": 20
         }
 
         if not os.path.exists(CFG_FL_NAME):
@@ -70,3 +72,6 @@ class Config:  # pylint: disable=too-few-public-methods,too-many-instance-attrib
 
         self.SELL_TIMEOUT = os.environ.get("SELL_TIMEOUT") or config.get(USER_CFG_SECTION, "sell_timeout")
         self.BUY_TIMEOUT = os.environ.get("BUY_TIMEOUT") or config.get(USER_CFG_SECTION, "buy_timeout")
+        self.MAX_AMOUNT = float(os.environ.get("MAX_AMOUNT") or config.get(USER_CFG_SECTION, "max_amount"))
+        self.MIN_AMOUNT = float(os.environ.get("MIN_AMOUNT") or config.get(USER_CFG_SECTION, "min_amount"))
+
