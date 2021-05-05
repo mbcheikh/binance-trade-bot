@@ -23,9 +23,13 @@ class Strategy(AutoTrader):
                 continue
 
             min_notional = self.manager.get_min_notional(coin.symbol, self.config.BRIDGE.symbol)
+            if coin.symbol =='BNB':
+                if coin_price * current_coin_balance <= self.config.MIN_BNB+min_notional:
+                    continue
+            else:
+                if  coin_price * current_coin_balance < min_notional:
+                    continue
 
-            if  coin_price * current_coin_balance < min_notional:
-                continue
 
             have_coin = True
 

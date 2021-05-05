@@ -132,8 +132,12 @@ class AutoTrader:
             min_amount=self.config.MIN_AMOUNT
 
 
-            if pair.to_coin.symbol in current_balances_dict and current_balances_dict[pair.to_coin.symbol]*all_tickers.get_price(pair.to_coin.symbol+self.config.BRIDGE_SYMBOL) >= self.config.MIN_AMOUNT:
-                continue
+            if pair.to_coin.symbol in current_balances_dict:
+                min_to_ignore=self.config.MIN_AMOUNT
+                if pair.to_coin.symbol=='BNB':
+                    min_to_ignore+=self.config.MIN_BNB
+                if current_balances_dict[pair.to_coin.symbol]*all_tickers.get_price(pair.to_coin.symbol+self.config.BRIDGE_SYMBOL) > min_to_ignore:
+                    continue
             pair_exists = (all_tickers.get_price(pair.from_coin + pair.to_coin),
                            all_tickers.get_price(pair.to_coin + pair.from_coin))
             if pair_exists[0] and pair_exists[0]>1e-06:
