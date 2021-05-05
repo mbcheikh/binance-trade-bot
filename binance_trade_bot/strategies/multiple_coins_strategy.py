@@ -37,7 +37,12 @@ class Strategy(AutoTrader):
             # has stopped. Not logging though to reduce log size.
             print(f"Scouting for best trades. Current coin: {coin} ")
 
-            self._jump_to_best_coin(coin, coin_price, all_tickers)
+            result=self._jump_to_best_coin(coin, coin_price, all_tickers)
+            if result:
+                #refresh prices and balances
+                all_tickers = self.manager.get_all_market_tickers()
+                current_balances = self.manager.get_balances()
+                current_balances_dict = {d['asset']: float(d['free']) for d in current_balances if float(d['free']) > 0}
 
         if not have_coin:
             self.bridge_scout()
