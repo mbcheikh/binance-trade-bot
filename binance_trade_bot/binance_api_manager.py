@@ -253,7 +253,7 @@ class BinanceAPIManager:
                     order = self.binance_client.order_limit_buy(
                         symbol=origin_symbol + target_symbol,
                         quantity=order_quantity,
-                        price=from_coin_price,
+                        price="{:.8f}".format(from_coin_price),
                     )
                 self.logger.info(order)
             except BinanceAPIException as e:
@@ -319,7 +319,7 @@ class BinanceAPIManager:
         while order is None:
             # Should sell at calculated price to avoid lost coin
             order = self.binance_client.order_limit_sell(
-                symbol=origin_symbol + target_symbol, quantity=(order_quantity), price=from_coin_price
+                symbol=origin_symbol + target_symbol, quantity=(order_quantity), price="{:.8f}".format(from_coin_price)
             )
 
         self.logger.info("order")

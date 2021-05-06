@@ -229,22 +229,25 @@ class AutoTrader:
             total_balance_usd=total_balance_btc=0
             for coin in coins:
                 btc_value=usd_value=0
-                if coin.symbol not in balances_dict or coin.symbol==self.config.BRIDGE_SYMBOL:
+                if coin.symbol not in balances_dict:
                     continue
                 balance = balances_dict[coin.symbol]
+                if  coin.symbol==self.config.BRIDGE_SYMBOL:
+                    usd_value=1
+                    btc_value = 1 / all_ticker_values.get_price('BTC' + bridge_symbol)
+                else:
+                    usd_value = all_ticker_values.get_price(coin + bridge_symbol)
+                    btc_value = all_ticker_values.get_price(coin + bridge_symbol) / all_ticker_values.get_price(
+                        'BTC' + bridge_symbol)
 
-                usd_value = all_ticker_values.get_price(coin + bridge_symbol)
-                try:
-                    btc_value = all_ticker_values.get_price(coin + bridge_symbol)/all_ticker_values.get_price('BTC'+bridge_symbol)
-                except:
-                    print ('maj cv impossible with '+coin.symbol)
                 value_of_btc=all_ticker_values.get_price('BTC'+bridge_symbol)
                 if usd_value and btc_value:
                     print("coin:", coin.symbol, "price usd: ", usd_value, "BTC:", btc_value, " balance usd:",
                         usd_value * balance, " balance BTC:", btc_value * balance,' Value_BTC:',value_of_btc)
                     total_balance_btc+=btc_value * balance
                     total_balance_usd+=usd_value * balance
-                cv = CoinValue(coin, balance, usd_value, btc_value, datetime=now)
-                session.add(cv)
+                if coin.symbol!=self.config.BRIDGE_SYMBOL:
+                    cv = CoinValue(coin, balance, usd_value, btc_value, datetime=now)
+                    session.add(cv)
                 #self.db.send_update(cv)
             print('Total balance usd:', total_balance_usd,' Total balance BTC:',total_balance_btc )
