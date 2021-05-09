@@ -25,7 +25,10 @@ class AutoTrader:
         Jump from the source coin to the destination coin through bridge coin
         """
         balance = self.manager.get_currency_balance(pair.from_coin.symbol)
-        from_coin_price = all_tickers.get_price(pair.from_coin + self.config.BRIDGE)
+        if pair.from_coin.symbol==self.config.BRIDGE_SYMBOL:
+            from_coin_price=1
+        else:
+            from_coin_price = all_tickers.get_price(pair.from_coin + self.config.BRIDGE)
 
         if not (balance) or balance * from_coin_price < self.manager.get_min_notional(pair.from_coin, self.config.BRIDGE):
             self.logger.info(
@@ -74,7 +77,10 @@ class AutoTrader:
         session: Session
         with self.db.db_session() as session:
             for pair in session.query(Pair).filter(Pair.to_coin == coin):
-                from_coin_price = all_tickers.get_price(pair.from_coin + self.config.BRIDGE)
+                if pair.from_coin.symbol==self.config.BRIDGE_SYMBOL:
+                    from_coin_price=1
+                else:
+                    from_coin_price = all_tickers.get_price(pair.from_coin + self.config.BRIDGE)
 
                 if from_coin_price is None:
                     self.logger.info(
@@ -97,14 +103,19 @@ class AutoTrader:
                     continue
                 self.logger.info(f"Initializing {pair.from_coin} vs {pair.to_coin}")
 
-                from_coin_price = all_tickers.get_price(pair.from_coin + self.config.BRIDGE)
+                if pair.from_coin.symbol==self.config.BRIDGE_SYMBOL:
+                    from_coin_price=1
+                else:
+                    from_coin_price = all_tickers.get_price(pair.from_coin + self.config.BRIDGE)
                 if from_coin_price is None:
                     self.logger.info(
                         "Skipping initializing {}, symbol not found".format(pair.from_coin + self.config.BRIDGE)
                     )
                     continue
-
-                to_coin_price = all_tickers.get_price(pair.to_coin + self.config.BRIDGE)
+                if pair.to_coin.symbol==self.config.BRIDGE_SYMBOL:
+                    to_coin_price=1
+                else:
+                    to_coin_price = all_tickers.get_price(pair.to_coin + self.config.BRIDGE)
                 if to_coin_price is None:
                     self.logger.info(
                         "Skipping initializing {}, symbol not found".format(pair.to_coin + self.config.BRIDGE)
@@ -131,12 +142,16 @@ class AutoTrader:
         for pair in self.db.get_pairs_from(coin):
             min_amount=self.config.MIN_AMOUNT
 
+            if pair.to_coin.symbol==self.config.BRIDGE_SYMBOL:
+                coin_price_bridge=1
+            else:
+                coin_price_bridge=all_tickers.get_price(pair.to_coin.symbol+self.config.BRIDGE_SYMBOL)
 
             if pair.to_coin.symbol in current_balances_dict:
                 min_to_ignore=self.config.MIN_AMOUNT
                 if pair.to_coin.symbol=='BNB':
                     min_to_ignore+=self.config.MIN_BNB
-                if current_balances_dict[pair.to_coin.symbol]*all_tickers.get_price(pair.to_coin.symbol+self.config.BRIDGE_SYMBOL) > min_to_ignore:
+                if current_balances_dict[pair.to_coin.symbol]*coin_price_bridge > min_to_ignore:
                     continue
             pair_exists = (all_tickers.get_price(pair.from_coin + pair.to_coin),
                            all_tickers.get_price(pair.to_coin + pair.from_coin))
