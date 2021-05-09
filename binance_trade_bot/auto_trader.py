@@ -25,16 +25,13 @@ class AutoTrader:
         Jump from the source coin to the destination coin through bridge coin
         """
         balance = self.manager.get_currency_balance(pair.from_coin.symbol)
-        if pair.from_coin.symbol==self.config.BRIDGE_SYMBOL:
-            from_coin_price=1
-        else:
-            from_coin_price = all_tickers.get_price(pair.from_coin + self.config.BRIDGE)
 
-        if not (balance) or balance * from_coin_price < self.manager.get_min_notional(pair.from_coin, self.config.BRIDGE):
+        if not (balance):
             self.logger.info(
                 f"Incorrect coin balance {pair.from_coin}"
             )
             return None
+
         direct_pair_price=all_tickers.get_price(pair.from_coin_id + pair.to_coin_id)
         inverse_pair_price=all_tickers.get_price(pair.to_coin_id + pair.from_coin_id)
         if direct_pair_price and float(direct_pair_price)>1e-6:
@@ -43,7 +40,10 @@ class AutoTrader:
             )
             result = self.manager.sell_alt(pair.from_coin, pair.to_coin, all_tickers)
             if result:
-                price=float(result['price'])*all_tickers.get_price(pair.to_coin+self.config.BRIDGE)
+                if pair.to_coin.symbol==self.config.BRIDGE_SYMBOL:
+                    price=float(result['price'])
+                else:
+                    price=float(result['price'])*all_tickers.get_price(pair.to_coin+self.config.BRIDGE)
 
         elif inverse_pair_price and float(inverse_pair_price)>1e-06:
             self.logger.info(
@@ -51,7 +51,10 @@ class AutoTrader:
             )
             result = self.manager.buy_alt(pair.to_coin, pair.from_coin, all_tickers, False)
             if result:
-                price = float(result['price']) * all_tickers.get_price(pair.from_coin + self.config.BRIDGE)
+                if pair.from_coin.symbol==self.config.BRIDGE_SYMBOL:
+                    price=float(result['price'])
+                else:
+                    price = float(result['price']) * all_tickers.get_price(pair.from_coin + self.config.BRIDGE)
         else:
             if self.manager.sell_alt(pair.from_coin, self.config.BRIDGE, all_tickers) is None:
                 self.logger.info("Couldn't sell, going back to scouting mode...")

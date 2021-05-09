@@ -16,13 +16,18 @@ class Strategy(AutoTrader):
             if not coin.symbol in current_balances_dict:
                 continue
             current_coin_balance = current_balances_dict[coin.symbol]
-            coin_price = all_tickers.get_price(coin + self.config.BRIDGE)
+            if coin.symbol==self.config.BRIDGE_SYMBOL:
+                coin_price=1
+                min_notional=10
+            else:
+                try:
+                    coin_price = all_tickers.get_price(coin + self.config.BRIDGE)
+                    min_notional = self.manager.get_min_notional(coin.symbol, self.config.BRIDGE.symbol)
+                except:
+                    self.logger.info("Skipping scouting... current coin {} not found".format(coin + self.config.BRIDGE))
+                    continue
 
-            if coin_price is None:
-                self.logger.info("Skipping scouting... current coin {} not found".format(coin + self.config.BRIDGE))
-                continue
 
-            min_notional = self.manager.get_min_notional(coin.symbol, self.config.BRIDGE.symbol)
             if coin.symbol =='BNB':
                 if coin_price * current_coin_balance <= self.config.MIN_BNB+min_notional:
                     continue
