@@ -50,7 +50,7 @@ class Strategy(AutoTrader):
                 all_tickers = self.manager.get_all_market_tickers()
                 current_balances = self.manager.get_balances()
                 current_balances_dict = {d['asset']: float(d['free']) for d in current_balances if float(d['free']) > 0}
-                self.db.get_coins(self.config.SUPPORTED_COIN_LIST)
+                self.db.set_coins(self.config.SUPPORTED_COIN_LIST)
 
         if not have_coin:
             self.bridge_scout()

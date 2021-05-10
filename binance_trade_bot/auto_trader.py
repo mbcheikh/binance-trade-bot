@@ -73,6 +73,7 @@ class AutoTrader:
         """
         Update all the coins with the threshold of buying the current held coin
         """
+        self.db.set_coins(self.config.SUPPORTED_COIN_LIST)
         if coin_price is None:
             self.logger.info("Skipping update... current coin {} not found".format(coin + self.config.BRIDGE))
             return
