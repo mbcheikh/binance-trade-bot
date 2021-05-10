@@ -80,7 +80,7 @@ class Database:
         session: Session
         with self.db_session() as session:
             if only_enabled:
-                coins = session.query(Coin).filter(Coin.enabled).all()
+                coins = session.query(Coin).filter(Coin.symbol.in_(self.config.SUPPORTED_COIN_LIST)).all()
             else:
                 coins = session.query(Coin).all()
             session.expunge_all()
