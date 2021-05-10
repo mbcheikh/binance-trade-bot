@@ -242,6 +242,13 @@ class BinanceAPIManager:
         self.logger.info(f"BUY QTY {order_quantity}")
 
         # Try to buy until successful
+        min_notional=self.get_min_notional(origin_symbol,target_symbol)
+        if order_quantity*from_coin_price<min_notional:
+            self.logger.info(
+                "Balance under min notiona - can't buy"
+            )
+            return None
+
         order = None
         while order is None:
             try:
