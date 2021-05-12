@@ -59,6 +59,7 @@ class AutoTrader:
             if self.manager.sell_alt(pair.from_coin, self.config.BRIDGE, all_tickers) is None:
                 self.logger.info("Couldn't sell, going back to scouting mode...")
                 return None
+
             result = self.manager.buy_alt(pair.to_coin, self.config.BRIDGE, all_tickers, False)
             if result:
                 price=float(result['price'])
@@ -73,6 +74,7 @@ class AutoTrader:
         """
         Update all the coins with the threshold of buying the current held coin
         """
+
         self.db.set_coins(self.config.SUPPORTED_COIN_LIST)
         if coin_price is None:
             self.logger.info("Skipping update... current coin {} not found".format(coin + self.config.BRIDGE))
