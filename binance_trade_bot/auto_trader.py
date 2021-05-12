@@ -156,9 +156,9 @@ class AutoTrader:
             min_amount=self.config.MIN_AMOUNT
 
             if pair.to_coin.symbol==self.config.BRIDGE_SYMBOL:
-                coin_price_bridge=1
+                optional_coin_price=1
             else:
-                coin_price_bridge=all_tickers.get_price(pair.to_coin.symbol+self.config.BRIDGE_SYMBOL)
+                optional_coin_price=all_tickers.get_price(pair.to_coin.symbol+self.config.BRIDGE_SYMBOL)
 
             if pair.to_coin.symbol in current_balances_dict:
                 min_to_ignore=self.config.MIN_AMOUNT
