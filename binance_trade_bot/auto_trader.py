@@ -93,8 +93,9 @@ class AutoTrader:
                         "Skipping update for coin {} not found".format(pair.from_coin + self.config.BRIDGE)
                     )
                     continue
-
+                anc_ratio=pair.ratio
                 pair.ratio = from_coin_price / coin_price
+                self.logger.info("Update "+pair.from_coin.symbol + pair.to_coin.symbol," Anc:",anc_ratio," ratio:"," From price:",from_coin_price," To ", coin_price)
 
     def initialize_trade_thresholds(self):
         """
