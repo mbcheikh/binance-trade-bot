@@ -95,7 +95,9 @@ class AutoTrader:
                     continue
                 anc_ratio=pair.ratio
                 pair.ratio = from_coin_price / coin_price
-                self.logger.info("Update "+pair.from_coin.symbol + pair.to_coin.symbol," Anc:",anc_ratio," ratio:"," From price:",from_coin_price," To ", coin_price)
+                self.logger.info(
+                    "Update "+pair.from_coin.symbol + pair.to_coin.symbol +" Anc:"+str(anc_ratio)+" ratio:"+str(ratio)+" From price:"+str(from_coin_price)+" To "+ str( coin_price)
+                )
 
     def initialize_trade_thresholds(self):
         """
