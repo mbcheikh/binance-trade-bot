@@ -358,7 +358,7 @@ class BinanceAPIManager:
             # (only the price between the two coins).
             # this assumes the order price relative to the bridge currency is determined based
             # on the current price since the market transaction is nearly instantaneous.
-            order["price"] = all_tickers.get_price(origin_coin + self.config.BRIDGE.symbol)
+            #order["price"] = all_tickers.get_price(origin_coin + self.config.BRIDGE.symbol)
             self.logger.info(
                 "Price of {0} was {1} {2} per {0}.".format(target_symbol, order["price"], self.config.BRIDGE.symbol)
             )

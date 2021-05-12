@@ -40,11 +40,15 @@ class AutoTrader:
             )
             result = self.manager.sell_alt(pair.from_coin, pair.to_coin, all_tickers)
             if result:
+                """
+                # big bug
+                # we will update db with the price 
                 if pair.to_coin.symbol==self.config.BRIDGE_SYMBOL:
                     price=float(result['price'])
                 else:
                     price=float(result['price'])*all_tickers.get_price(pair.to_coin+self.config.BRIDGE)
-
+                """
+                price=all_tickers.get_price(pair.to_coin+self.config.BRIDGE)
         elif inverse_pair_price and float(inverse_pair_price)>1e-06:
             self.logger.info(
                 "Direct pair {0}{1} exists. Buying {0} with {1}".format(pair.to_coin_id, pair.from_coin_id)
