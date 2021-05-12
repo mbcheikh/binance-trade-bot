@@ -177,6 +177,8 @@ class AutoTrader:
                 optional_coin_price = pair_exists[1]
                 transaction_fee = self.manager.get_fee(pair.to_coin, pair.from_coin, False)
             else:
+                if self.config.ONLY_DIRECT_PAIRS:
+                    continue
                 coin_price = coin_price_bridge
                 optional_coin_price = all_tickers.get_price(pair.to_coin + self.config.BRIDGE)
                 transaction_fee = self.manager.get_fee(pair.from_coin, self.config.BRIDGE, True) + self.manager.get_fee(
