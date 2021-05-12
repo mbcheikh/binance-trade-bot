@@ -235,8 +235,9 @@ class BinanceAPIManager:
                 target_balance=target_balance-self.config.MIN_BNB/target_coin_price_bridge
             else:
                 return None
-        if self.config.MAX_AMOUNT:
-             if target_balance * target_coin_price_bridge> self.config.MAX_AMOUNT+self.config.MIN_AMOUNT:
+        if self.config.MAX_AMOUNT and target_coin.symbol!=self.config.BRIDGE_SYMBOL:
+            # recycle previous canceled orders
+            if target_balance * target_coin_price_bridge> self.config.MAX_AMOUNT+self.config.MIN_AMOUNT:
                 target_balance=self.config.MAX_AMOUNT / target_coin_price_bridge
         order_quantity = self._buy_quantity(origin_symbol, target_symbol, target_balance, from_coin_price)
         self.logger.info(f"BUY QTY {order_quantity}")
