@@ -267,9 +267,10 @@ class BinanceAPIManager:
                 self.logger.info(order)
             except BinanceAPIException as e:
                 self.logger.info(e)
-                time.sleep(1)
+                time.sleep(2)
             except Exception as e:  # pylint: disable=broad-except
                 self.logger.info(f"Unexpected Error: {e}")
+                time.sleep(2)
 
         trade_log.set_ordered(origin_balance, target_balance, order_quantity)
 
