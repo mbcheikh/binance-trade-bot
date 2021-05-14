@@ -44,7 +44,7 @@ class AutoTrader:
             self.logger.info(
                 "Direct pair {0}{1} exists. Selling {0} for {1}".format(pair.from_coin_id, pair.to_coin_id)
             )
-            result = self.manager.sell_alt(pair.from_coin, pair.to_coin, all_tickers)
+            result = self.manager.sell_alt(pair.from_coin, pair.to_coi)
             if result:
                 """
                 # big bug
@@ -59,7 +59,7 @@ class AutoTrader:
             self.logger.info(
                 "Direct pair {0}{1} exists. Buying {0} with {1}".format(pair.to_coin_id, pair.from_coin_id)
             )
-            result = self.manager.buy_alt(pair.to_coin, pair.from_coin, all_tickers, False)
+            result = self.manager.buy_alt(pair.to_coin, pair.from_coin, False)
             if result:
                 if pair.from_coin.symbol==self.config.BRIDGE_SYMBOL:
                     price=float(result['price'])
@@ -76,7 +76,7 @@ class AutoTrader:
 
         if result is not None:
             self.db.set_current_coin(pair.to_coin)
-            self.update_trade_threshold(pair.to_coin, float(result["price"]), all_tickers)
+            self.update_trade_threshold(pair.to_coin, float(result["price"]))
             return result
 
         self.logger.info("Couldn't buy, going back to scouting mode...")
@@ -108,8 +108,6 @@ class AutoTrader:
         """
         Initialize the buying threshold of all the coins for trading between them
         """
-        all_tickers = self.manager.get_all_market_tickers()
-
         session: Session
         with self.db.db_session() as session:
             for pair in session.query(Pair).filter(Pair.ratio.is_(None)).all():
@@ -139,7 +137,7 @@ class AutoTrader:
         """
         raise NotImplementedError()
 
-    def _get_ratios(self, coin: Coin, coin_price: float, all_tickers: AllTickers):
+    def _get_ratios(self, coin: Coin, coin_price: float):
         """
         Given a coin, get the current price ratio for every other enabled coin
         """
@@ -168,11 +166,11 @@ class AutoTrader:
             ) - pair.ratio
         return ratio_dict
 
-    def _jump_to_best_coin(self, coin: Coin, coin_price: float, all_tickers: AllTickers):
+    def _jump_to_best_coin(self, coin: Coin, coin_price: float):
         """
         Given a coin, search for a coin to jump to
         """
-        ratio_dict = self._get_ratios(coin, coin_price, all_tickers)
+        ratio_dict = self._get_ratios(coin, coin_price)
 
         # keep only ratios bigger than zero
         ratio_dict = {k: v for k, v in ratio_dict.items() if v > 0}
@@ -181,23 +179,16 @@ class AutoTrader:
         if ratio_dict:
             best_pair = max(ratio_dict, key=ratio_dict.get)
             self.logger.info(f"Will be jumping from {coin} to {best_pair.to_coin_id}")
-            self.transaction_through_bridge(best_pair, all_tickers)
+            self.transaction_through_bridge(best_pair)
 
     def bridge_scout(self):
         """
         If we have any bridge coin leftover, buy a coin with it that we won't immediately trade out of
         """
         bridge_balance = self.manager.get_currency_balance(self.config.BRIDGE.symbol)
-        all_tickers = self.manager.get_all_market_tickers()
 
         for coin in self.db.get_coins():
             current_coin_price = self.manager.get_ticker_price(coin + self.config.BRIDGE)
-            self.logger.info("Skipping sell")
-
-        if can_sell and self.manager.sell_alt(pair.from_coin, self.config.BRIDGE) is None:
-            self.logger.info("Couldn't sell, going back to scouting mode...")
-            return None
-        result = self.manager.buy_alt(pair.to_coin, self.config.BRIDGE)
 
             if current_coin_price is None:
                 continue
@@ -215,9 +206,6 @@ class AutoTrader:
         """
         Log current value state of all altcoin balances against BTC and USDT in DB.
         """
-        print("Logging values...")
-        all_ticker_values = self.manager.get_all_market_tickers()
-
         now = datetime.now()
 
         session: Session
@@ -228,8 +216,8 @@ class AutoTrader:
             balances_dict={d['asset']:float(d['free']) for d in balances if float(d['free'])>0}
             total_balance_usd=total_balance_btc=0
             for coin in coins:
-                btc_value=usd_value=0
-                if coin.symbol not in balances_dict:
+                balance = self.manager.get_currency_balance(coin.symbol)
+                if balance == 0:
                     continue
 
                 cv = CoinValue(coin, balance, usd_value, btc_value, datetime=now)
@@ -238,13 +226,13 @@ class AutoTrader:
                 balance = balances_dict[coin.symbol]
                 if  coin.symbol==self.config.BRIDGE_SYMBOL:
                     usd_value=1
-                    btc_value = 1 / all_ticker_values.get_price('BTC' + bridge_symbol)
+                    btc_value = 1 / self.manager.get_ticker_price('BTC' + bridge_symbol)
                 else:
-                    usd_value = all_ticker_values.get_price(coin + bridge_symbol)
-                    btc_value = all_ticker_values.get_price(coin + bridge_symbol) / all_ticker_values.get_price(
+                    usd_value = self.manager.get_ticker_price(coin + "USDT")
+                    btc_value = self.manager.get_ticker_price(coin + bridge_symbol) / self.manager.get_ticker_price(
                         'BTC' + bridge_symbol)
 
-                value_of_btc=all_ticker_values.get_price('BTC'+bridge_symbol)
+                value_of_btc=self.manager.get_ticker_price('BTC'+bridge_symbol)
                 if usd_value and btc_value:
                     print("coin:", coin.symbol, "price usd: ", usd_value, "BTC:", btc_value, " balance usd:",
                         usd_value * balance, " balance BTC:", btc_value * balance,' Value_BTC:',value_of_btc)

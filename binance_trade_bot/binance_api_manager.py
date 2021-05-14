@@ -7,6 +7,7 @@ from binance.client import Client
 from binance.exceptions import BinanceAPIException
 from cachetools import TTLCache, cached
 
+from .binance_stream_manager import BinanceCache, BinanceOrder, BinanceStreamManager, OrderGuard
 from .config import Config
 from .database import Database
 from .logger import Logger
@@ -75,10 +76,15 @@ class BinanceAPIManager:
 
 
     def get_account(self):
+        """
         Get account information
+        """
         return self.binance_client.get_account()
 
     def get_ticker_price(self, ticker_symbol: str):
+        """
+        Get ticker price of a specific coin
+        """
         price = self.cache.ticker_values.get(ticker_symbol, None)
         if price is None and ticker_symbol not in self.cache.non_existent_tickers:
             self.cache.ticker_values = {
