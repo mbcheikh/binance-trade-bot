@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from binance_trade_bot.auto_trader import AutoTrader
 
 
@@ -6,30 +8,27 @@ class Strategy(AutoTrader):
         """
         Scout for potential jumps from the current coin to another coin
         """
-        all_tickers = self.manager.get_all_market_tickers()
         have_coin = False
 
         # last coin bought
-        current_balances=self.manager.get_balances()
-        current_balances_dict={d['asset']:float(d['free']) for d in current_balances if float(d['free'])>0}
+        current_coin = self.db.get_current_coin()
+        current_coin_symbol = ""
 
-        list_coins=self.db.get_coins()
-        for coin in list_coins:
-            if not coin.symbol in current_balances_dict:
+        if current_coin is not None:
+            current_coin_symbol = current_coin.symbol
+
+        for coin in self.db.get_coins():
+            current_coin_balance = self.manager.get_currency_balance(coin.symbol)
+            coin_price = self.manager.get_ticker_price(coin + self.config.BRIDGE)
+
+            if coin_price is None:
+                self.logger.info("Skipping scouting... current coin {} not found".format(coin + self.config.BRIDGE))
                 continue
-            current_coin_balance = current_balances_dict[coin.symbol]
-            if coin.symbol==self.config.BRIDGE_SYMBOL:
-                coin_price=1
-                min_notional=20
-            else:
-                try:
-                    coin_price = all_tickers.get_price(coin + self.config.BRIDGE)
-                    min_notional = self.manager.get_min_notional(coin.symbol, self.config.BRIDGE.symbol)+10
-                except:
-                    self.logger.info("Skipping scouting... current coin {} not found".format(coin + self.config.BRIDGE))
-                    continue
 
+            min_notional = self.manager.get_min_notional(coin.symbol, self.config.BRIDGE.symbol)
 
+            if coin.symbol != current_coin_symbol and coin_price * current_coin_balance < min_notional:
+                continue
             if coin.symbol =='BNB':
                 if coin_price * current_coin_balance <= self.config.MIN_BNB+min_notional:
                     continue
@@ -44,12 +43,10 @@ class Strategy(AutoTrader):
             # has stopped. Not logging though to reduce log size.
             print(f"Scouting for best trades. Current coin: {coin} ")
 
-            result=self._jump_to_best_coin(coin, coin_price, all_tickers)
+            result=self._jump_to_best_coin(coin, coin_price)
+
             if result:
                 #refresh prices and balances
-                all_tickers = self.manager.get_all_market_tickers()
-                current_balances = self.manager.get_balances()
-                current_balances_dict = {d['asset']: float(d['free']) for d in current_balances if float(d['free']) > 0}
                 self.db.set_coins(self.config.SUPPORTED_COIN_LIST)
 
         if not have_coin:

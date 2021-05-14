@@ -75,10 +75,9 @@ SCOUT_MULTIPLIER: 5
 SCOUT_SLEEP_TIME: 5
 TLD: com
 STRATEGY: default
-buy_timeout=0
-sell_timeout=0
 MAX_AMOUNT: 0
-
+BUY_TIMEOUT: 0
+SELL_TIMEOUT: 0
 ```
 
 ### Paying Fees with BNB
@@ -151,6 +150,10 @@ pre-commit install
 
 The scouting algorithm is unlikely to be changed. If you'd like to contribute an alternative
 method, [add a new strategy](binance_trade_bot/strategies/README.md).
+
+## Related Projects
+
+Thanks to a group of talented developers, there is now a [Telegram bot for remotely managing this project](https://github.com/lorcalhost/BTB-manager-telegram).
 
 ## Support the Project
 
