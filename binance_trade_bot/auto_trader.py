@@ -32,7 +32,7 @@ class AutoTrader:
             pair.from_coin.symbol, self.config.BRIDGE.symbol
         ):
             can_sell = True
-        if not (balance):
+        if not balance:
             self.logger.info(
                 f"Incorrect coin balance {pair.from_coin}"
             )
@@ -59,7 +59,7 @@ class AutoTrader:
             self.logger.info(
                 "Direct pair {0}{1} exists. Buying {0} with {1}".format(pair.to_coin_id, pair.from_coin_id)
             )
-            result = self.manager.buy_alt(pair.to_coin, pair.from_coin, False)
+            result = self.manager.buy_alt(pair.to_coin, pair.from_coin)
             if result:
                 if pair.from_coin.symbol==self.config.BRIDGE_SYMBOL:
                     price=float(result['price'])
@@ -137,14 +137,45 @@ class AutoTrader:
         """
         raise NotImplementedError()
 
-    def _get_ratios(self, coin: Coin, coin_price: float):
+    def _get_ratios(self, coin: Coin, coin_price_bridge: float):
         """
         Given a coin, get the current price ratio for every other enabled coin
         """
         ratio_dict: Dict[Pair, float] = {}
 
         for pair in self.db.get_pairs_from(coin):
-            optional_coin_price = self.manager.get_ticker_price(pair.to_coin + self.config.BRIDGE)
+            min_amount=self.config.MIN_AMOUNT
+
+
+            if pair.to_coin.symbol==self.config.BRIDGE_SYMBOL:
+                optional_coin_price=1
+            else:
+                optional_coin_price=self.manager.get_ticker_price(pair.to_coin + self.config.BRIDGE)
+            to_coin_balance=self.manager.get_currency_balance(pair.to_coin.symbol)
+            if to_coin_balance:
+                min_to_ignore=self.config.MIN_AMOUNT
+                if pair.to_coin.symbol=='BNB':
+                    min_to_ignore+=self.config.MIN_BNB
+                if to_coin_balance*optional_coin_price > min_to_ignore:
+                    continue
+            pair_exists = (self.manager.get_ticker_price(pair.from_coin + pair.to_coin),
+                           self.manager.get_ticker_price(pair.to_coin + pair.from_coin))
+            if pair_exists[0] and pair_exists[0]>1e-06:
+                coin_price = pair_exists[0]
+                optional_coin_price = 1
+                transaction_fee = self.manager.get_fee(pair.from_coin, pair.to_coin, True)
+            elif pair_exists[1] and pair_exists[1]>1e-06:
+                coin_price = 1
+                optional_coin_price = pair_exists[1]
+                transaction_fee = self.manager.get_fee(pair.to_coin, pair.from_coin, False)
+            else:
+                if self.config.ONLY_DIRECT_PAIRS:
+                    continue
+                coin_price = coin_price_bridge
+                optional_coin_price = self.manager.get_ticker_price(pair.to_coin + self.config.BRIDGE)(pair.to_coin + self.config.BRIDGE)
+                transaction_fee = self.manager.get_fee(pair.from_coin, self.config.BRIDGE, True) + self.manager.get_fee(
+                    pair.to_coin, self.config.BRIDGE, False
+                )
 
             if optional_coin_price is None:
                 self.logger.info(
