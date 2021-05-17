@@ -93,7 +93,6 @@ class BinanceAPIManager:
             self.logger.debug(f"Fetched all ticker prices: {self.cache.ticker_values}")
             price = self.cache.ticker_values.get(ticker_symbol, None)
             if price is None:
-                self.logger.info(f"Ticker does not exist: {ticker_symbol} - will not be fetched from now on")
                 self.cache.non_existent_tickers.add(ticker_symbol)
         return price
 

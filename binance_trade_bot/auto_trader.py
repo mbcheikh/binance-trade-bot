@@ -153,7 +153,7 @@ class AutoTrader:
                 optional_coin_price=self.manager.get_ticker_price(pair.to_coin + self.config.BRIDGE)
             to_coin_balance=self.manager.get_currency_balance(pair.to_coin.symbol)
             if to_coin_balance:
-                min_to_ignore=self.config.MIN_AMOUNT
+                min_to_ignore=min_amount
                 if pair.to_coin.symbol=='BNB':
                     min_to_ignore+=self.config.MIN_BNB
                 if to_coin_balance*optional_coin_price > min_to_ignore:
@@ -172,7 +172,7 @@ class AutoTrader:
                 if self.config.ONLY_DIRECT_PAIRS:
                     continue
                 coin_price = coin_price_bridge
-                optional_coin_price = self.manager.get_ticker_price(pair.to_coin + self.config.BRIDGE)(pair.to_coin + self.config.BRIDGE)
+                optional_coin_price = self.manager.get_ticker_price(pair.to_coin + self.config.BRIDGE)
                 transaction_fee = self.manager.get_fee(pair.from_coin, self.config.BRIDGE, True) + self.manager.get_fee(
                     pair.to_coin, self.config.BRIDGE, False
                 )
@@ -241,36 +241,35 @@ class AutoTrader:
 
         session: Session
         bridge_symbol=self.config.BRIDGE_SYMBOL
+        value_of_btc = self.manager.get_ticker_price('BTCUSDT')
+        print("BTC:",value_of_btc)
         with self.db.db_session() as session:
             coins: List[Coin] = session.query(Coin).all()
-            balances=self.manager.get_balances()
-            balances_dict={d['asset']:float(d['free']) for d in balances if float(d['free'])>0}
-            total_balance_usd=total_balance_btc=0
+            total_balance_btc = 0
+            total_balance_usd  = 0
             for coin in coins:
                 balance = self.manager.get_currency_balance(coin.symbol)
                 if balance == 0:
                     continue
 
-                cv = CoinValue(coin, balance, usd_value, btc_value, datetime=now)
-                session.add(cv)
-                self.db.send_update(cv)
-                balance = balances_dict[coin.symbol]
+
+
+                balance = self.manager.get_currency_balance(coin.symbol)
                 if  coin.symbol==self.config.BRIDGE_SYMBOL:
                     usd_value=1
                     btc_value = 1 / self.manager.get_ticker_price('BTC' + bridge_symbol)
                 else:
                     usd_value = self.manager.get_ticker_price(coin + "USDT")
-                    btc_value = self.manager.get_ticker_price(coin + bridge_symbol) / self.manager.get_ticker_price(
-                        'BTC' + bridge_symbol)
+                    btc_value = self.manager.get_ticker_price(coin + "USDT") / value_of_btc
 
-                value_of_btc=self.manager.get_ticker_price('BTC'+bridge_symbol)
+
                 if usd_value and btc_value:
                     print("coin:", coin.symbol, "price usd: ", usd_value, "BTC:", btc_value, " balance usd:",
-                        usd_value * balance, " balance BTC:", btc_value * balance,' Value_BTC:',value_of_btc)
+                        usd_value * balance, " balance BTC:", btc_value * balance)
                     total_balance_btc+=btc_value * balance
                     total_balance_usd+=usd_value * balance
                 if coin.symbol!=self.config.BRIDGE_SYMBOL:
                     cv = CoinValue(coin, balance, usd_value, btc_value, datetime=now)
                     session.add(cv)
-                #self.db.send_update(cv)
+                    self.db.send_update(cv)
             print('Total balance usd:', total_balance_usd,' Total balance BTC:',total_balance_btc )
