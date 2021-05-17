@@ -270,14 +270,15 @@ class AutoTrader:
                     btc_value = all_ticker_values.get_price(coin + bridge_symbol) / all_ticker_values.get_price(
                         'BTC' + bridge_symbol)
 
-                value_of_btc=all_ticker_values.get_price('BTC'+bridge_symbol)
+                btc_price=all_ticker_values.get_price('BTC'+bridge_symbol)
                 if usd_value and btc_value:
-                    print("coin:", coin.symbol, "price usd: ", usd_value, "BTC:", btc_value, " balance usd:",
-                        usd_value * balance, " balance BTC:", btc_value * balance,' Value_BTC:',value_of_btc)
+                    self.logger.info(
+                        f"coin: {coin.symbol} price: USDT {usd_value} BTC {btc_value} Balance: USDT {usd_value * balance} BTC {btc_value * balance}"
+                    )
                     total_balance_btc+=btc_value * balance
                     total_balance_usd+=usd_value * balance
                 if coin.symbol!=self.config.BRIDGE_SYMBOL:
                     cv = CoinValue(coin, balance, usd_value, btc_value, datetime=now)
                     session.add(cv)
                 #self.db.send_update(cv)
-            print('Total balance usd:', total_balance_usd,' Total balance BTC:',total_balance_btc )
+            self.logger.info(f"Total balance USDT: {total_balance_usd} BTC: {total_balance_btc} BTC price: {btc_price}" )
