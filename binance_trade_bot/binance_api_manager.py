@@ -129,7 +129,7 @@ class BinanceAPIManager:
                 if attempts == 0:
                     self.logger.warning(traceback.format_exc())
                 attempts += 1
-                time.sleep(1)
+                time.sleep(5)
         return None
 
     def get_symbol_filter(self, origin_symbol: str, target_symbol: str, filter_type: str):
