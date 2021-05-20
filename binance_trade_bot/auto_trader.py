@@ -253,7 +253,7 @@ class AutoTrader:
                 all_ticker_values = self.manager.get_all_market_tickers()
                 gottickers=True
             except:
-                time.sleep(2)
+                time.sleep(5)
 
         now = datetime.now()
 
