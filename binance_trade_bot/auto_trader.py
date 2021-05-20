@@ -64,7 +64,7 @@ class AutoTrader:
                 self.logger.info("Couldn't sell, going back to scouting mode...")
                 return None
 
-            result = self.manager.buy_alt(pair.to_coin, self.config.BRIDGE, all_tickers, False)
+            result = self.manager.buy_alt(pair.to_coin, self.config.BRIDGE, all_tickers, True)
             if result:
                 price=float(result['price'])
 
