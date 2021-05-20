@@ -382,7 +382,7 @@ class BinanceAPIManager:
             # on the current price since the market transaction is nearly instantaneous.
             #order["price"] = all_tickers.get_price(origin_coin + self.config.BRIDGE.symbol)
             self.logger.info(
-                "Price of {0} was {1} {2} per {0}.".format(target_symbol, order["price"], self.config.BRIDGE.symbol)
+                "Price of {0} was {1} {2} per {0}.".format(target_symbol, order.price, self.config.BRIDGE.symbol)
             )
 
         return order

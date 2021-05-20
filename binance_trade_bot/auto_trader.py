@@ -37,13 +37,14 @@ class AutoTrader:
                 f"Incorrect coin balance {pair.from_coin}"
             )
             return None
-
+        direct_trade=False
         direct_pair_price=self.manager.get_ticker_price(pair.from_coin_id + pair.to_coin_id)
         inverse_pair_price=self.manager.get_ticker_price(pair.to_coin_id + pair.from_coin_id)
         if direct_pair_price and float(direct_pair_price)>1e-6:
             self.logger.info(
                 "Direct pair {0}{1} exists. Selling {0} for {1}".format(pair.from_coin_id, pair.to_coin_id)
             )
+            direct_trade=True
             result = self.manager.sell_alt(pair.from_coin, pair.to_coin)
             if result:
                 """
@@ -59,23 +60,28 @@ class AutoTrader:
             self.logger.info(
                 "Direct pair {0}{1} exists. Buying {0} with {1}".format(pair.to_coin_id, pair.from_coin_id)
             )
+            direct_trade=True
             result = self.manager.buy_alt(pair.to_coin, pair.from_coin)
             if result:
                 if pair.from_coin.symbol==self.config.BRIDGE_SYMBOL:
-                    price=float(result['price'])
+                    price=float(result.price)
                 else:
-                    price = float(result['price']) * self.manager.get_ticker_price(pair.from_coin + self.config.BRIDGE)
+                    price = float(result.price) * self.manager.get_ticker_price(pair.from_coin + self.config.BRIDGE)
+
+        if direct_trade:
+            if not result:
+                self.logger.info("Couldn't buy/sell in direct pair, going back to scouting mode...")
+                return None
+
         else:
-            self.logger.info("Skipping sell")
-
-        if can_sell and self.manager.sell_alt(pair.from_coin, self.config.BRIDGE) is None:
-            self.logger.info("Couldn't sell, going back to scouting mode...")
-            return None
-
-        result = self.manager.buy_alt(pair.to_coin, self.config.BRIDGE)
+            if can_sell and self.manager.sell_alt(pair.from_coin, self.config.BRIDGE) is None:
+                self.logger.info("Couldn't sell, going back to scouting mode...")
+                return None
+            result = self.manager.buy_alt(pair.to_coin, self.config.BRIDGE)
+            price=result.price
 
         if result is not None:
-            self.update_trade_threshold(pair.to_coin, float(result["price"]))
+            self.update_trade_threshold(pair.to_coin, price)
             return result
         self.logger.info("Couldn't buy, going back to scouting mode...")
         return None
@@ -250,8 +256,8 @@ class AutoTrader:
 
         session: Session
         bridge_symbol=self.config.BRIDGE_SYMBOL
-        value_of_btc = self.manager.get_ticker_price('BTCUSDT')
-        print("BTC:",value_of_btc)
+        btc_price = self.manager.get_ticker_price('BTCUSDT')
+
         with self.db.db_session() as session:
             coins: List[Coin] = session.query(Coin).all()
             total_balance_btc = 0
@@ -269,7 +275,7 @@ class AutoTrader:
                     btc_value = 1 / self.manager.get_ticker_price('BTC' + bridge_symbol)
                 else:
                     usd_value = self.manager.get_ticker_price(coin + "USDT")
-                    btc_value = self.manager.get_ticker_price(coin + "USDT") / value_of_btc
+                    btc_value = self.manager.get_ticker_price(coin + "USDT") / btc_price
 
 
 
