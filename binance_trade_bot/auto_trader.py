@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from typing import Dict, List
 
@@ -246,7 +247,13 @@ class AutoTrader:
         Log current value state of all altcoin balances against BTC and USDT in DB.
         """
         print("Logging values...")
-        all_ticker_values = self.manager.get_all_market_tickers()
+        gottickers=False
+        while not gottickers:
+            try:
+                all_ticker_values = self.manager.get_all_market_tickers()
+                gottickers=True
+            except:
+                time.sleep(2)
 
         now = datetime.now()
 
