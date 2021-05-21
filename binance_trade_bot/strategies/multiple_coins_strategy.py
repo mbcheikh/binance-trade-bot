@@ -47,7 +47,9 @@ class Strategy(AutoTrader):
 
             if result:
                 #refresh prices and balances
-                self.db.set_coins(self.config.SUPPORTED_COIN_LIST)
+                # was set when including bridge in supported list of coins
+                pass
+                #self.db.set_coins(self.config.SUPPORTED_COIN_LIST)
 
         if not have_coin:
             self.bridge_scout()
