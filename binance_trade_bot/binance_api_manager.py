@@ -48,7 +48,7 @@ class BinanceAPIManager:
         return self.binance_client.get_bnb_burn_spot_margin()["spotBNBBurn"]
 
     def get_fee(self, origin_coin: Coin, target_coin: Coin, selling: bool):
-        return 0.0075
+        return 0.00075
         base_fee = self.get_trade_fees()[origin_coin + target_coin]
         if not self.get_using_bnb_for_fees():
             return base_fee
