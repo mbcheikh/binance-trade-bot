@@ -267,8 +267,6 @@ class AutoTrader:
                 if balance == 0:
                     continue
 
-
-
                 balance = self.manager.get_currency_balance(coin.symbol)
                 if  coin.symbol==self.config.BRIDGE_SYMBOL:
                     usd_value=1
