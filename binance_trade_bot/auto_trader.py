@@ -25,6 +25,9 @@ class AutoTrader:
         """
         Jump from the source coin to the destination coin through bridge coin
         """
+        btc_price=all_tickers.get_price("BTCUSDT")
+        if btc_price< self.config.STOPLOSS:
+            return None
         balance = self.manager.get_currency_balance(pair.from_coin.symbol)
 
         if not (balance):
@@ -262,7 +265,7 @@ class AutoTrader:
         with self.db.db_session() as session:
             coins: List[Coin] = session.query(Coin).all()
             balances=self.manager.get_balances()
-            balances_dict={d['asset']:float(d['free']) for d in balances if float(d['free'])>0}
+            balances_dict={d['asset']:float(d['free'])+float(d['locked']) for d in balances if float(d['free'])+float(d['locked'])>0}
             total_balance_usd=total_balance_btc=0
             for coin in coins:
                 btc_value=usd_value=0

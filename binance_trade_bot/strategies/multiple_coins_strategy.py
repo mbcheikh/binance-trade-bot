@@ -7,6 +7,12 @@ class Strategy(AutoTrader):
         Scout for potential jumps from the current coin to another coin
         """
         all_tickers = self.manager.get_all_market_tickers()
+        btc_price=all_tickers.get_price('BTCUSDT')
+        stoploss=self.config.STOPLOSS
+        if stoploss and btc_price<stoploss:
+            print(f"btc price too low ( {btc_price}) - skip scouting")
+            return
+
         have_coin = False
 
         # last coin bought
