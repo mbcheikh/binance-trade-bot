@@ -346,21 +346,25 @@ class BinanceAPIManager:
 
         # Binance server can take some time to save the order
         self.logger.info("Waiting for Binance")
+        status_unknown=True
 
-        while True:
+        while status_unknown:
             try:
                 stat = self.wait_for_order(origin_symbol, target_symbol, order["orderId"])
-            except:
+                status_unknown=False
+            except Exception as e:
+                print(e)
                 time.sleep(1)
 
 
         if stat is None:
             return None
-
+        """
         new_balance = self.get_currency_balance(origin_symbol)
+        
         while new_balance >= origin_balance:
             new_balance = self.get_currency_balance(origin_symbol)
-
+        """
         self.logger.info(f"Sold {origin_symbol}")
 
         trade_log.set_complete(stat["cummulativeQuoteQty"])
