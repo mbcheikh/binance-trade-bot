@@ -126,10 +126,11 @@ class BinanceAPIManager:
         return float(self.get_symbol_filter(origin_symbol, target_symbol, "MIN_NOTIONAL")["minNotional"])
 
     def wait_for_order(self, origin_symbol, target_symbol, order_id):
-        while True:
+        status_unknown=True
+        while status_unknown:
             try:
                 order_status = self.binance_client.get_order(symbol=origin_symbol + target_symbol, orderId=order_id)
-                break
+                status_unknown=False
             except BinanceAPIException as e:
                 self.logger.info(e)
                 time.sleep(1)
@@ -273,8 +274,14 @@ class BinanceAPIManager:
                 time.sleep(2)
 
         trade_log.set_ordered(origin_balance, target_balance, order_quantity)
-
-        stat = self.wait_for_order(origin_symbol, target_symbol, order["orderId"])
+        status_unkown=True
+        while status_unkown:
+            try:
+                stat = self.wait_for_order(origin_symbol, target_symbol, order["orderId"])
+                status_unkown=False
+            except Exception as e:
+                print(f"status error: {e}")
+                time.sleep(1)
 
         if stat is None:
             return None
@@ -340,7 +347,12 @@ class BinanceAPIManager:
         # Binance server can take some time to save the order
         self.logger.info("Waiting for Binance")
 
-        stat = self.wait_for_order(origin_symbol, target_symbol, order["orderId"])
+        while True:
+            try:
+                stat = self.wait_for_order(origin_symbol, target_symbol, order["orderId"])
+            except:
+                time.sleep(1)
+
 
         if stat is None:
             return None
