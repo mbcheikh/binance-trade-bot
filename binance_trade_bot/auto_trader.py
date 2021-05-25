@@ -272,15 +272,17 @@ class AutoTrader:
                 if coin.symbol not in balances_dict:
                     continue
                 balance = balances_dict[coin.symbol]
-                if  coin.symbol==self.config.BRIDGE_SYMBOL:
+                if  coin.symbol=='USDT':
                     usd_value=1
-                    btc_value = 1 / all_ticker_values.get_price('BTC' + bridge_symbol)
+                    btc_value = 1 / all_ticker_values.get_price('BTCUSDT')
+                elif coin.symbol=='BTC':
+                    btc_value=1
+                    usd_value=all_ticker_values.get_price('BTCUSDT')
                 else:
-                    usd_value = all_ticker_values.get_price(coin + bridge_symbol)
-                    btc_value = all_ticker_values.get_price(coin + bridge_symbol) / all_ticker_values.get_price(
-                        'BTC' + bridge_symbol)
+                    usd_value = all_ticker_values.get_price(coin + 'USDT')
+                    btc_value = all_ticker_values.get_price(coin + 'BTC')
 
-                btc_price=all_ticker_values.get_price('BTC'+bridge_symbol)
+                btc_price=all_ticker_values.get_price('BTCUSDT')
                 if usd_value and btc_value:
                     self.logger.info(
                         f"coin: {coin.symbol} price: USDT {usd_value} BTC {btc_value} Balance: USDT {usd_value * balance} BTC {btc_value * balance}"
