@@ -29,6 +29,23 @@ class Strategy(AutoTrader):
 
             if coin.symbol != current_coin_symbol and coin_price * current_coin_balance < min_notional:
                 continue
+            btc_price = self.manager.get_ticker_price('BTCUSDT')
+            stoploss = self.config.STOPLOSS
+            if stoploss and btc_price < stoploss:
+                print(f"btc price too low ( {btc_price}) - skip scouting")
+                return
+            if coin.symbol==self.config.BRIDGE_SYMBOL:
+                coin_price=1
+                min_notional=20
+            else:
+                try:
+                    coin_price = self.manager.get_ticker_price(coin + self.config.BRIDGE)
+                    min_notional = self.manager.get_min_notional(coin.symbol, self.config.BRIDGE.symbol)+10
+                except:
+                    self.logger.info("Skipping scouting... current coin {} not found".format(coin + self.config.BRIDGE))
+                    continue
+
+
             if coin.symbol =='BNB':
                 if coin_price * current_coin_balance <= self.config.MIN_BNB+min_notional:
                     continue

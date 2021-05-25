@@ -270,7 +270,7 @@ class AutoTrader:
                 balance = self.manager.get_currency_balance(coin.symbol)
                 if  coin.symbol==self.config.BRIDGE_SYMBOL:
                     usd_value=1
-                    btc_value = 1 / self.manager.get_ticker_price('BTC' + bridge_symbol)
+                    btc_value = 1 / self.manager.get_ticker_price('BTCUSDT')
                 else:
                     usd_value = self.manager.get_ticker_price(coin + "USDT")
                     btc_value = self.manager.get_ticker_price(coin + "USDT") / btc_price

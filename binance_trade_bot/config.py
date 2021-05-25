@@ -24,7 +24,8 @@ class Config:  # pylint: disable=too-few-public-methods,too-many-instance-attrib
             "max_amount": 200,
             "min_amount": 20,
             "min_bnb": 100,
-            "only_direct_pairs":1
+            "only_direct_pairs":0,
+            "stoploss":-1
         }
 
         if not os.path.exists(CFG_FL_NAME):
@@ -78,5 +79,7 @@ class Config:  # pylint: disable=too-few-public-methods,too-many-instance-attrib
         self.MIN_AMOUNT = float(os.environ.get("MIN_AMOUNT") or config.get(USER_CFG_SECTION, "min_amount"))
         self.MIN_BNB = float(os.environ.get("MIN_BNB") or config.get(USER_CFG_SECTION, "min_bnb"))
         self.ONLY_DIRECT_PAIRS=  int(os.environ.get("ONLY_DIRECT_PAIRS") or config.get(USER_CFG_SECTION, "only_direct_pairs"))
+        self.STOPLOSS = float(
+            os.environ.get("STOPLOSS") or config.get(USER_CFG_SECTION, "stoploss"))
 
 
