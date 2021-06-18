@@ -22,7 +22,7 @@ class Strategy(AutoTrader):
             btc_price = all_tickers.get_price('BTCUSDT')
             stoploss = self.config.STOPLOSS
             if stoploss and btc_price < stoploss:
-                print(f"btc price too low ( {btc_price}) - skip scouting")
+                self.logger.info(f"btc price too low ( {btc_price}) - skip scouting")
                 return
             current_coin_balance = current_balances_dict[coin.symbol]
             if coin.symbol==self.config.BRIDGE_SYMBOL:
@@ -49,7 +49,7 @@ class Strategy(AutoTrader):
 
             # Display on the console, the current coin+Bridge, so users can see *some* activity and not think the bot
             # has stopped. Not logging though to reduce log size.
-            print(f"Scouting for best trades. Current coin: {coin} ")
+            self.logger.info(f"Scouting for best trades. Current coin: {coin} ")
 
             result=self._jump_to_best_coin(coin, coin_price, all_tickers)
             if result:

@@ -212,7 +212,7 @@ class AutoTrader:
         ratio_dict = self._get_ratios(coin, coin_price, all_tickers)
         best_ratio=max(ratio_dict,key=ratio_dict.get)
         # keep only ratios bigger than zero
-        print("BEST:",best_ratio, '{0:10.8f}'.format(ratio_dict[best_ratio]))
+        self.logger.info(f"BEST: {best_ratio}" )
         ratio_dict = {k: v for k, v in ratio_dict.items() if v > 0}
 
         # if we have any viable options, pick the one with the biggest ratio
