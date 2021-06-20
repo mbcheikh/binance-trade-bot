@@ -212,7 +212,7 @@ class AutoTrader:
         ratio_dict = self._get_ratios(coin, coin_price, all_tickers)
         best_ratio=max(ratio_dict,key=ratio_dict.get)
         # keep only ratios bigger than zero
-        self.logger.info(f"BEST: {best_ratio}" )
+        self.logger.info(f"BEST: {best_ratio}  {ratio_dict[best_ratio]}" )
         ratio_dict = {k: v for k, v in ratio_dict.items() if v > 0}
 
         # if we have any viable options, pick the one with the biggest ratio
@@ -247,7 +247,7 @@ class AutoTrader:
 
     def update_values(self):
         """
-        Log current value state of all altcoin balances against BTC and USDT in DB.
+        Log current value state of all altcoi n balances against BTC and USDT in DB.
         """
         print("Logging values...")
         gottickers=False
